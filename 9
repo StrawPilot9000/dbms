@@ -1,0 +1,42 @@
+CREATE TABLE borrower(
+  rollin INT,
+  name VARCHAR(30),
+  dateofissue DATE,
+  nameofbook VARCHAR(40),
+  status CHAR(1)
+);
+
+CREATE TABLE library_audit(
+  rollin INT,
+  name VARCHAR(30),
+  dateofissue DATE,
+  nameofbook VARCHAR(40),
+  status CHAR(1),
+  ts TIMESTAMP
+);
+
+DELIMITER //
+CREATE TRIGGER trg_borrower_audit
+BEFORE UPDATE ON borrower
+FOR EACH ROW
+BEGIN
+  INSERT INTO library_audit
+  VALUES (OLD.rollin, OLD.name, OLD.dateofissue, OLD.nameofbook, OLD.status, NOW());
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER trg_borrower_audit_del
+BEFORE DELETE ON borrower
+FOR EACH ROW
+BEGIN
+  INSERT INTO library_audit
+  VALUES (OLD.rollin, OLD.name, OLD.dateofissue, OLD.nameofbook, OLD.status, NOW());
+END //
+DELIMITER ;
+
+-- Example
+INSERT INTO borrower VALUES (1,'Amit','2025-10-10','DBMS','I');
+UPDATE borrower SET status='R' WHERE rollin=1;
+DELETE FROM borrower WHERE rollin=1;
+SELECT * FROM library_audit;
