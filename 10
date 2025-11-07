@@ -1,0 +1,27 @@
+use collegeDB;
+
+db.student.insertMany([
+  { stud_id: 1, stud_name: "Amit", dept: "Computer", marks: 75 },
+  { stud_id: 2, stud_name: "Neha", dept: "IT", marks: 55 },
+  { stud_id: 3, stud_name: "Rohan", dept: "Civil", marks: 45 },
+  { stud_id: 4, stud_name: "Rita", dept: "Chemical", marks: 25 },
+  { stud_id: 5, stud_name: "Vikram", dept: "Computer", marks: 90 }
+]);
+
+// 1. Marks greater than 50
+db.student.find({ marks: { $gt: 50 } });
+
+// 2. Marks between 50 and 80
+db.student.find({ marks: { $gte: 50, $lte: 80 } });
+
+// 3. Marks >60 from Computer dept
+db.student.find({ dept: "Computer", marks: { $gt: 60 } });
+
+// 4. Update marks of Civil students to 30
+db.student.updateMany({ dept: "Civil" }, { $set: { marks: 30 } });
+
+// 5. Delete Chemical students with marks <30
+db.student.deleteMany({ dept: "Chemical", marks: { $lt: 30 } });
+
+// View final collection
+db.student.find();
