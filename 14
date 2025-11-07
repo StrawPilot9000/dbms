@@ -1,0 +1,37 @@
+use storeDB;
+
+db.customers.insertMany([
+  { customer_id: 1, name: "Amit", city: "Pune" },
+  { customer_id: 2, name: "Neha", city: "Mumbai" },
+  { customer_id: 3, name: "Rita", city: "Delhi" }
+]);
+
+db.orders.insertMany([
+  { order_id: 101, customer_id: 1, product: "Laptop", total: 50000 },
+  { order_id: 102, customer_id: 2, product: "Phone", total: 25000 },
+  { order_id: 103, customer_id: 3, product: "Table", total: 12000 },
+  { order_id: 104, customer_id: 1, product: "Mouse", total: 1000 }
+]);
+
+// Join using $lookup
+db.orders.aggregate([
+  {
+    $lookup: {
+      from: "customers",
+      localField: "customer_id",
+      foreignField: "customer_id",
+      as: "cust_details"
+    }
+  },
+  { $unwind: "$cust_details" },
+  {
+    $project: {
+      _id: 0,
+      order_id: 1,
+      product: 1,
+      total: 1,
+      "cust_details.name": 1,
+      "cust_details.city": 1
+    }
+  }
+]);
