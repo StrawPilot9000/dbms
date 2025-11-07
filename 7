@@ -1,0 +1,77 @@
+--part 1
+
+CREATE TABLE stud21(
+  rollno INT,
+  att INT,
+  status CHAR(1)
+);
+
+CREATE TABLE d_stud(
+  roll INT,
+  att INT
+);
+
+DELIMITER //
+CREATE PROCEDURE mark_detained()
+BEGIN
+  DECLARE r INT; DECLARE a INT;
+  DECLARE done INT DEFAULT 0;
+  DECLARE cur CURSOR FOR SELECT rollno, att FROM stud21 WHERE att < 75;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+  OPEN cur;
+  read_loop: LOOP
+    FETCH cur INTO r, a;
+    IF done = 1 THEN LEAVE read_loop; END IF;
+
+    UPDATE stud21 SET status = 'D' WHERE rollno = r;
+    INSERT INTO d_stud VALUES(r, a);
+  END LOOP;
+  CLOSE cur;
+END //
+DELIMITER ;
+
+-- Example run
+INSERT INTO stud21 VALUES (1,80,'P'),(2,60,'P'),(3,70,'P');
+CALL mark_detained();
+SELECT * FROM stud21;
+SELECT * FROM d_stud;
+
+
+
+-- part 2
+
+CREATE TABLE employees(
+  designation VARCHAR(20),
+  name VARCHAR(30),
+  manager_id INT
+);
+
+INSERT INTO employees VALUES
+('CLERK','Amit',150),
+('CLERK','Neha',121),
+('MANAGER','Rohan',110);
+
+DELIMITER //
+CREATE PROCEDURE show_clerks()
+BEGIN
+  DECLARE done INT DEFAULT 0;
+  DECLARE cur CURSOR FOR
+    SELECT name, designation FROM employees
+    WHERE designation='CLERK' AND manager_id>120;
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done=1;
+
+  OPEN cur;
+  read_loop: LOOP
+    FETCH cur INTO @n,@d;
+    IF done=1 THEN LEAVE read_loop; END IF;
+    SELECT CONCAT('Name: ',@n,' | Designation: ',@d) AS Info;
+  END LOOP;
+  CLOSE cur;
+END //
+DELIMITER ;
+
+CALL show_clerks();
+
+
