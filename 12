@@ -1,0 +1,34 @@
+use shopDB;
+
+db.sales.insertMany([
+  { customerName: "Amit", product: "Laptop", category: "Electronics", quantity: 2, price: 40000, date: new Date("2025-01-10"), city: "Pune", paymentMode: "Card" },
+  { customerName: "Neha", product: "Phone", category: "Electronics", quantity: 1, price: 25000, date: new Date("2025-02-05"), city: "Mumbai", paymentMode: "UPI" },
+  { customerName: "Rita", product: "Table", category: "Furniture", quantity: 1, price: 15000, date: new Date("2025-03-20"), city: "Pune", paymentMode: "Cash" },
+  { customerName: "Rohan", product: "Chair", category: "Furniture", quantity: 4, price: 4000, date: new Date("2025-03-15"), city: "Delhi", paymentMode: "Card" },
+  { customerName: "Vikram", product: "Headphones", category: "Electronics", quantity: 3, price: 3000, date: new Date("2025-04-05"), city: "Pune", paymentMode: "UPI" }
+]);
+
+// 1. Total revenue per category
+db.sales.aggregate([
+  { $group: { _id: "$category", totalRevenue: { $sum: { $multiply: ["$quantity", "$price"] } } } }
+]);
+
+// 2. Average order value per city
+db.sales.aggregate([
+  { $group: { _id: "$city", avgOrderValue: { $avg: { $multiply: ["$quantity", "$price"] } } } }
+]);
+
+// 3. Top 3 products by total revenue
+db.sales.aggregate([
+  { $group: { _id: "$product", totalRevenue: { $sum: { $multiply: ["$quantity", "$price"] } } } },
+  { $sort: { totalRevenue: -1 } },
+  { $limit: 3 }
+]);
+
+// 4. Count orders per payment mode
+db.sales.aggregate([
+  { $group: { _id: "$paymentMode", totalOrders: { $sum: 1 } } }
+]);
+
+// 5. Create index on product for faster searches
+db.sales.createIndex({ product: 1 });
