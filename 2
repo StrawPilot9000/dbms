@@ -1,0 +1,39 @@
+CREATE TABLE Student(
+  stud_id INT PRIMARY KEY,
+  deptnm VARCHAR(20),
+  sem INT,
+  yr INT,
+  credits INT
+);
+
+CREATE TABLE Teaches(
+  teacher_id INT PRIMARY KEY,
+  teacher_name VARCHAR(30),
+  salary INT,
+  deptnm VARCHAR(20)
+);
+
+-- Insert records
+INSERT INTO Student VALUES
+(1,'Comp',3,2024,20),
+(2,'Comp',2,2024,18),
+(3,'IT',4,2024,22);
+
+INSERT INTO Teaches VALUES
+(101,'Amit',5000,'Comp'),
+(102,'Neha',3000,'IT'),
+(103,'Ravi',1500,'Civil');
+
+-- Update department
+UPDATE Student SET deptnm='IT' WHERE deptnm='Comp';
+
+-- Highest salary department
+SELECT deptnm, MAX(salary) AS highest_salary FROM Teaches;
+
+-- Delete teachers with salary < 2000
+DELETE FROM Teaches WHERE salary < 2000;
+
+-- Sum of salary per department
+SELECT deptnm, SUM(salary) AS total_salary
+FROM Teaches
+GROUP BY deptnm;
