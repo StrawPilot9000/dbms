@@ -1,0 +1,87 @@
+-- part 1
+
+
+CREATE TABLE O_RollCall(
+  rollno INT PRIMARY KEY,
+  name VARCHAR(30)
+);
+
+CREATE TABLE N_RollCall(
+  rollno INT,
+  name VARCHAR(30)
+);
+
+-- sample data
+INSERT INTO O_RollCall VALUES (1,'Amit'),(2,'Neha');
+INSERT INTO N_RollCall VALUES (2,'Neha'),(3,'Rohan'),(4,'Rita');
+
+DELIMITER //
+CREATE PROCEDURE merge_roll()
+BEGIN
+  DECLARE r INT; DECLARE n VARCHAR(30);
+  DECLARE done INT DEFAULT 0;
+
+  DECLARE cur CURSOR FOR
+    SELECT rollno,name FROM N_RollCall;
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done=1;
+
+  OPEN cur;
+  read_loop: LOOP
+    FETCH cur INTO r,n;
+    IF done=1 THEN LEAVE read_loop; END IF;
+
+    IF NOT EXISTS (SELECT * FROM O_RollCall WHERE rollno=r) THEN
+      INSERT INTO O_RollCall VALUES(r,n);
+    END IF;
+  END LOOP;
+  CLOSE cur;
+END //
+DELIMITER ;
+
+CALL merge_roll();
+SELECT * FROM O_RollCall;
+
+
+
+
+
+-- part 2
+
+
+CREATE TABLE employees(
+  designation VARCHAR(20),
+  name VARCHAR(30),
+  manager_id INT
+);
+
+INSERT INTO employees VALUES
+('CLERK','Amit',150),
+('CLERK','Neha',121),
+('MANAGER','Rohan',110);
+
+DELIMITER //
+CREATE PROCEDURE show_clerks()
+BEGIN
+  DECLARE done INT DEFAULT 0;
+  DECLARE cur CURSOR FOR
+    SELECT name,designation FROM employees
+    WHERE designation='CLERK' AND manager_id>120;
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done=1;
+
+  OPEN cur;
+  read_loop: LOOP
+    FETCH cur INTO @n,@d;
+    IF done=1 THEN LEAVE read_loop; END IF;
+    SELECT CONCAT('Name: ',@n,' | Designation: ',@d) AS Info;
+  END LOOP;
+  CLOSE cur;
+END //
+DELIMITER ;
+
+CALL show_clerks();
+
+
+
+
