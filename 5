@@ -1,0 +1,48 @@
+CREATE TABLE Borrower(
+  Roll_no INT,
+  Name VARCHAR(30),
+  DateOfIssue DATE,
+  NameOfBook VARCHAR(40),
+  Status CHAR(1)
+);
+
+CREATE TABLE Fine(
+  Roll_no INT,
+  Date DATE,
+  Amt INT
+);
+
+-- Stored Procedure
+DELIMITER //
+CREATE PROCEDURE calc_fine(IN p_roll INT, IN p_book VARCHAR(40))
+BEGIN
+  DECLARE issue_date DATE;
+  DECLARE days INT;
+  DECLARE fine_amt INT DEFAULT 0;
+
+  SELECT DateOfIssue INTO issue_date
+  FROM Borrower
+  WHERE Roll_no=p_roll AND NameOfBook=p_book;
+
+  SET days = DATEDIFF(CURDATE(), issue_date);
+
+  IF days BETWEEN 15 AND 30 THEN
+    SET fine_amt = days * 5;
+  ELSEIF days > 30 THEN
+    SET fine_amt = days * 50;
+  END IF;
+
+  UPDATE Borrower
+  SET Status='R'
+  WHERE Roll_no=p_roll AND NameOfBook=p_book;
+
+  IF fine_amt > 0 THEN
+    INSERT INTO Fine VALUES(p_roll, CURDATE(), fine_amt);
+  END IF;
+END //
+DELIMITER ;
+
+-- Example
+INSERT INTO Borrower VALUES (1,'Amit','2025-10-01','DBMS','I');
+CALL calc_fine(1,'DBMS');
+SELECT * FROM Fine;
