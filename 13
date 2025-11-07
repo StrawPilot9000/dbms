@@ -1,0 +1,29 @@
+use bankDB;
+
+db.bank.insertMany([
+  { branchName: "Pune", accountNumber: 101, accountHolder: "Amit", balance: 50000 },
+  { branchName: "Pune", accountNumber: 102, accountHolder: "Neha", balance: 75000 },
+  { branchName: "Mumbai", accountNumber: 201, accountHolder: "Rita", balance: 60000 },
+  { branchName: "Mumbai", accountNumber: 202, accountHolder: "Rohan", balance: 40000 },
+  { branchName: "Delhi", accountNumber: 301, accountHolder: "Vikram", balance: 90000 }
+]);
+
+// Map function
+var mapFn = function() {
+  emit(this.branchName, this.balance);
+};
+
+// Reduce function
+var reduceFn = function(branch, balances) {
+  return Array.sum(balances);
+};
+
+// Run MapReduce
+db.bank.mapReduce(
+  mapFn,
+  reduceFn,
+  { out: "branch_total_balance" }
+);
+
+// View results
+db.branch_total_balance.find();
