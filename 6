@@ -1,0 +1,45 @@
+CREATE TABLE Stud_Marks(
+  roll INT,
+  name VARCHAR(30),
+  total_marks INT
+);
+
+CREATE TABLE Result(
+  roll INT,
+  name VARCHAR(30),
+  class VARCHAR(30)
+);
+
+DELIMITER //
+CREATE PROCEDURE proc_Grade()
+BEGIN
+  DECLARE done INT DEFAULT 0;
+  DECLARE r INT; DECLARE n VARCHAR(30); DECLARE m INT;
+  DECLARE cur CURSOR FOR SELECT roll,name,total_marks FROM Stud_Marks;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done=1;
+
+  OPEN cur;
+  read_loop: LOOP
+    FETCH cur INTO r,n,m;
+    IF done=1 THEN LEAVE read_loop; END IF;
+
+    IF m BETWEEN 990 AND 1500 THEN
+      INSERT INTO Result VALUES(r,n,'Distinction');
+    ELSEIF m BETWEEN 900 AND 989 THEN
+      INSERT INTO Result VALUES(r,n,'First Class');
+    ELSEIF m BETWEEN 825 AND 899 THEN
+      INSERT INTO Result VALUES(r,n,'Higher Second Class');
+    ELSE
+      INSERT INTO Result VALUES(r,n,'Fail');
+    END IF;
+  END LOOP;
+  CLOSE cur;
+END //
+DELIMITER ;
+
+-- Example
+INSERT INTO Stud_Marks VALUES
+(1,'Amit',1200),(2,'Neha',950),(3,'Rohan',860),(4,'Rita',700);
+
+CALL proc_Grade();
+SELECT * FROM Result;
